@@ -1,9 +1,5 @@
 /* global cordova */
 
-const promiseExec = (action, args) => new Promise((resolve, reject) => {
-  cordova.exec(resolve, reject, "LocalDevices", action, args);
-});
-
 module.exports = {
   DEVICE_TYPES: {
     ESCPOS: "printer-escpos",
@@ -18,13 +14,11 @@ module.exports = {
    * @param {String[]} options.deviceTypesToRecognize - Device types to recognize, default: all
    */
   scan: ({ onProgress, timeout, deviceTypesToRecognize }) => new Promise((resolve, reject) => {
-    promiseExec("scan", [timeout, deviceTypesToRecognize])
-      .then(({ state, data }) => {
-        if (state === "progress") {
-          return onProgress && onProgress(data);
-        }
-        return resolve(data);
-      })
-      .catch(reject);
+    cordova.exec(({ state, data }) => {
+      if (state === "progress") {
+        return onProgress && onProgress(data);
+      }
+      return resolve(data);
+    }, reject, "LocalDevices", "scan", [timeout, deviceTypesToRecognize]);
   }),
 };
