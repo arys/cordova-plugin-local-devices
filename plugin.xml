@@ -3,7 +3,7 @@
         id="com.arystankaliakparov.cordova_plugin_local_devices"
         version="0.7.0">
 
-  <name>Hello</name>
+  <name>Local Devices</name>
 
   <engines>
     <engine name="cordova" version=">=3.4.0"/>
