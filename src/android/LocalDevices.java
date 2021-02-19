@@ -35,12 +35,13 @@ public class LocalDevices extends CordovaPlugin {
                         String ip = subnet + "." + i;
                         if (InetAddress.getByName(ip).isReachable(timeout)) {
                             RecognizeDevice recognizer = new RecognizeDevice(ip, types);
-                            String type = recognizer.recognize();
+                            Device device = recognizer.recognize();
 
-                            JSONObject device = new JSONObject();
-                            device.put("ip", ip);
-                            device.put("type", type);
-                            ips.put(device);
+                            JSONObject deviceJson = new JSONObject();
+                            deviceJson.put("ip", device.ip);
+                            deviceJson.put("name", device.name);
+                            deviceJson.put("type", device.type);
+                            ips.put(deviceJson);
 
                             JSONObject result = new JSONObject();
                             result.put("data", ips);

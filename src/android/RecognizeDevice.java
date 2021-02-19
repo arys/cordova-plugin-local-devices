@@ -9,7 +9,7 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java9.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -31,8 +31,8 @@ public class RecognizeDevice {
         this.host = host;
     }
 
-    public String recognize() throws JSONException {
-        List<CompletableFuture<String>> futures = new ArrayList<>();
+    public Device recognize() throws JSONException {
+        List<CompletableFuture<Device>> futures = new ArrayList<>();
         futures.add(CompletableFuture.supplyAsync(this::unrecognizedDevice));
 
         for (int i = 0; i < deviceTypesToRecognize.length(); i++) {
@@ -41,35 +41,35 @@ public class RecognizeDevice {
             }
         }
 
-        CompletableFuture<String>[] futuresArray = futures.toArray(new CompletableFuture[futures.size()]);
+        CompletableFuture<Device>[] futuresArray = futures.toArray(new CompletableFuture[futures.size()]);
         CompletableFuture<Object> anyOfFuture = CompletableFuture.anyOf(futuresArray);
 
         try {
-            return String.valueOf(anyOfFuture.get());
+            return (Device) anyOfFuture.get();
         } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
         }
 
-        return DEVICE_TYPE_UNRECOGNIZED;
+        return new Device(host, "Unrecognized", DEVICE_TYPE_UNRECOGNIZED);
     }
 
-    private String unrecognizedDevice() {
+    private Device unrecognizedDevice() {
         try {
             TimeUnit.SECONDS.sleep(3);
         } catch (InterruptedException e) {
             throw new IllegalStateException(e);
         }
-        return DEVICE_TYPE_UNRECOGNIZED;
+        return new Device(host, "Unrecognized", DEVICE_TYPE_UNRECOGNIZED);
     }
 
-    private String isESCPOS() {
+    private Device isESCPOS() {
         Socket client = null;
         try {
             SocketAddress address = new InetSocketAddress(host, 9100);
             client = new Socket();
             client.connect(address, 5000);
             client.close();
-            return DEVICE_TYPE_ESCPOS;
+            return new Device(host, "ESC/POS", DEVICE_TYPE_ESCPOS);
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -79,7 +79,7 @@ public class RecognizeDevice {
                 e.printStackTrace();
             }
         }
-        return DEVICE_TYPE_UNRECOGNIZED;
+        return new Device(host, "Unrecognized", DEVICE_TYPE_UNRECOGNIZED);
     }
 
 }
