@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
-        id="com.arystankaliakparov.cordova_plugin_local_devices"
+        id="cordova-plugin-local-devices"
         version="0.7.0">
 
   <name>Local Devices</name>
@@ -9,8 +9,8 @@
     <engine name="cordova" version=">=3.4.0"/>
   </engines>
 
-  <js-module src="www/local-devices.js" name="local-devices">
-    <clobbers target="local-devcies" />
+  <js-module src="www/local-devices.js" name="LocalDevices">
+    <clobbers target="LocalDevices" />
   </js-module>
 
   <platform name="android">
