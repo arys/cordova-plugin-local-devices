@@ -13,7 +13,6 @@ public class Utils {
                 for (InetAddress addr : addrs) {
                     if (!addr.isLoopbackAddress()) {
                         String sAddr = addr.getHostAddress();
-                        //boolean isIPv4 = InetAddressUtils.isIPv4Address(sAddr);
                         boolean isIPv4 = sAddr.indexOf(':')<0;
 
                         if (useIPv4) {
@@ -21,15 +20,18 @@ public class Utils {
                                 return sAddr;
                         } else {
                             if (!isIPv4) {
-                                int delim = sAddr.indexOf('%'); // drop ip6 zone suffix
+                                int delim = sAddr.indexOf('%');
                                 return delim<0 ? sAddr.toUpperCase() : sAddr.substring(0, delim).toUpperCase();
                             }
                         }
                     }
                 }
             }
-        } catch (Exception ignored) { } // for now eat exceptions
+        } catch (Exception ignored) { }
         return "";
     }
 
+    public static String getSubnetAddress(String ip) {
+        return ip.substring(0, ip.lastIndexOf("."));
+    }
 }

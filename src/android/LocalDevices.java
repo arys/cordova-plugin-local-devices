@@ -1,31 +1,31 @@
 package com.arystankaliakparov.cordova_plugin_local_devices;
 
-import android.util.Log;
-
 import org.apache.cordova.*;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 public class LocalDevices extends CordovaPlugin {
+
+    static int ARG_INDEX_TIMEOUT = 0;
+    static int ARG_INDEX_DEVICE_TYPES_TO_RECOGNIZE = 1;
 
     @Override
     public boolean execute(String action, JSONArray data, CallbackContext callbackContext) throws JSONException {
         if (action.equals("scan")) {
-            String ip = Utils.getIPAddress(true);
-            String[] ipSplit = ip.split("\\.");
-            String subnet = ipSplit[0] + "." + ipSplit[1] + "." + ipSplit[2];
-            scan(subnet, callbackContext);
+            JSONArray types = data.optJSONArray(ARG_INDEX_DEVICE_TYPES_TO_RECOGNIZE);
+            int timeout = data.optInt(ARG_INDEX_TIMEOUT, 500);
+            String subnet = Utils.getSubnetAddress(Utils.getIPAddress(true));
+            scan(subnet, callbackContext, timeout, types);
             return true;
         }
-
         return false;
     }
 
-    void scan(String subnet, CallbackContext callbackContext) {
+    void scan(String subnet, CallbackContext callbackContext, int timeout, JSONArray types) {
         cordova.getThreadPool().execute(new Runnable() {
             @Override
             public void run() {
@@ -33,16 +33,35 @@ public class LocalDevices extends CordovaPlugin {
                 try {
                     for (int i = 1; i < 255; i++){
                         String ip = subnet + "." + i;
-                        if (InetAddress.getByName(ip).isReachable(5)){
-                            ips.put(ip);
+                        if (InetAddress.getByName(ip).isReachable(timeout)) {
+                            RecognizeDevice recognizer = new RecognizeDevice(ip, types);
+                            String type = recognizer.recognize();
+
+                            JSONObject device = new JSONObject();
+                            device.put("ip", ip);
+                            device.put("type", type);
+                            ips.put(device);
+
+                            JSONObject result = new JSONObject();
+                            result.put("data", ips);
+                            result.put("state", "progress");
+                            PluginResult res = new PluginResult(PluginResult.Status.OK, result);
+                            res.setKeepCallback(true);
+
+                            callbackContext.sendPluginResult(res);
                         }
                     }
-                } catch (UnknownHostException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
+                } catch (IOException | JSONException e) {
                     e.printStackTrace();
                 }
-                callbackContext.success(ips);
+                JSONObject result = new JSONObject();
+                try {
+                    result.put("data", ips);
+                    result.put("state", "completed");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                callbackContext.success(result);
             }
         });
     }
