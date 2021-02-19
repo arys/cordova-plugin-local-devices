@@ -1,0 +1,27 @@
+{
+  "name": "cordova-plugin-local-devices",
+  "version": "1.0.0",
+  "description": "Scan and recognize local devices",
+  "cordova": {
+    "id": "cordova-plugin-local-devices",
+    "platforms": [
+      "android"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arys/cordova-plugin-local-devices.git"
+  },
+  "keywords": [
+    "cordova",
+    "plugin",
+    "ecosystem:cordova",
+    "cordova-android"
+  ],
+  "author": "Arystan Kaliakparov",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/arys/cordova-plugin-local-devices/issues"
+  },
+  "homepage": "https://github.com/arys/cordova-plugin-local-devices#readme"
+}
