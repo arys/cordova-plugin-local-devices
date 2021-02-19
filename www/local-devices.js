@@ -17,17 +17,14 @@ module.exports = {
    * @param {number} options.timeout - Scanning timeout, default: 500 ms
    * @param {String[]} options.deviceTypesToRecognize - Device types to recognize, default: all
    */
-  scan: (options) => {
-    const { onProgress, timeout, deviceTypesToRecognize } = options || {};
-    return new Promise((resolve, reject) => {
-      promiseExec("scan", [timeout, deviceTypesToRecognize])
-        .then(({ state, data }) => {
-          if (state === "progress") {
-            return onProgress(data);
-          }
-          return resolve(data);
-        })
-        .catch(reject);
-    });
-  },
+  scan: ({ onProgress, timeout, deviceTypesToRecognize }) => new Promise((resolve, reject) => {
+    promiseExec("scan", [timeout, deviceTypesToRecognize])
+      .then(({ state, data }) => {
+        if (state === "progress") {
+          return onProgress && onProgress(data);
+        }
+        return resolve(data);
+      })
+      .catch(reject);
+  }),
 };
