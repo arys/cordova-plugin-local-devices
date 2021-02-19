@@ -1,7 +1,10 @@
-/*global cordova, module*/
+/* global cordova */
 
 module.exports = {
-    greet: function (name, successCallback, errorCallback) {
-        cordova.exec(successCallback, errorCallback, "LocalDevices", "greet", [name]);
-    }
+  greet(name, successCallback, errorCallback) {
+    cordova.exec(successCallback, errorCallback, "LocalDevices", "greet", [name]);
+  },
+  scan(args, successCallback, errorCallback) {
+    cordova.exec(successCallback, errorCallback, "LocalDevices", "scan", [args]);
+  },
 };
