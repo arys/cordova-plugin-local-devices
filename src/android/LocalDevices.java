@@ -45,9 +45,9 @@ public class LocalDevices extends CordovaPlugin {
                             JSONObject result = new JSONObject();
                             result.put("data", ips);
                             result.put("state", "progress");
+
                             PluginResult res = new PluginResult(PluginResult.Status.OK, result);
                             res.setKeepCallback(true);
-
                             callbackContext.sendPluginResult(res);
                         }
                     }
