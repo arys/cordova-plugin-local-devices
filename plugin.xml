@@ -28,5 +28,8 @@
     </config-file>
 
     <source-file src="src/android/LocalDevices.java" target-dir="src/com/arystankaliakparov/cordova_plugin_local_devices/"/>
+    <source-file src="src/android/Device.java" target-dir="src/com/arystankaliakparov/cordova_plugin_local_devices/"/>
+    <source-file src="src/android/RecognizeDevice.java" target-dir="src/com/arystankaliakparov/cordova_plugin_local_devices/"/>
+    <source-file src="src/android/Utils.java" target-dir="src/com/arystankaliakparov/cordova_plugin_local_devices/"/>
   </platform>
 </plugin>
