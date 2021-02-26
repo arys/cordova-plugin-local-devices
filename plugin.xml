@@ -15,6 +15,9 @@
 
   <platform name="android">
     <framework src="net.sourceforge.streamsupport:android-retrofuture:1.7.3"/>
+    <framework src="com.izettle:html2bitmap:1.9"/>
+    <framework src="com.github.DantSu:ESCPOS-ThermalPrinter-Android:2.0.10"/>
+    <framework src="com.google.code.gson:gson:2.8.6"/>
 
     <config-file target="res/xml/config.xml" parent="/*">
       <feature name="LocalDevices">

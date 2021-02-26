@@ -1,12 +1,11 @@
 package com.arystankaliakparov.cordova_plugin_local_devices;
 
+import com.dantsu.escposprinter.connection.tcp.TcpConnection;
+import com.dantsu.escposprinter.exceptions.EscPosConnectionException;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java9.util.concurrent.CompletableFuture;
@@ -15,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 public class RecognizeDevice {
     public static final String DEVICE_TYPE_ESCPOS = "printer-escpos";
+    public static final String DEVICE_TYPE_SYSTEM = "printer-system";
     public static final String DEVICE_TYPE_UNRECOGNIZED = "unrecognized";
 
     String host;
@@ -55,7 +55,7 @@ public class RecognizeDevice {
 
     private Device unrecognizedDevice() {
         try {
-            TimeUnit.SECONDS.sleep(3);
+            TimeUnit.SECONDS.sleep(1);
         } catch (InterruptedException e) {
             throw new IllegalStateException(e);
         }
@@ -63,21 +63,13 @@ public class RecognizeDevice {
     }
 
     private Device isESCPOS() {
-        Socket client = null;
+        TcpConnection tcpConnection = new TcpConnection(host, 9100);
         try {
-            SocketAddress address = new InetSocketAddress(host, 9100);
-            client = new Socket();
-            client.connect(address, 5000);
-            client.close();
+            tcpConnection.connect();
+            tcpConnection.disconnect();
             return new Device(host, "ESC/POS", DEVICE_TYPE_ESCPOS);
-        } catch (IOException e) {
+        } catch (EscPosConnectionException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                client.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
         return new Device(host, "Unrecognized", DEVICE_TYPE_UNRECOGNIZED);
     }
