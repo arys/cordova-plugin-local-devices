@@ -3,16 +3,9 @@ package com.arystankaliakparov.cordova_plugin_local_devices;
 import android.graphics.Bitmap;
 import android.util.Log;
 
-import com.dantsu.escposprinter.EscPosPrinter;
+import com.dantsu.escposprinter.EscPosPrinterCommands;
 import com.dantsu.escposprinter.connection.tcp.TcpConnection;
-import com.dantsu.escposprinter.exceptions.EscPosBarcodeException;
-import com.dantsu.escposprinter.exceptions.EscPosConnectionException;
-import com.dantsu.escposprinter.exceptions.EscPosEncodingException;
-import com.dantsu.escposprinter.exceptions.EscPosParserException;
-import com.dantsu.escposprinter.textparser.PrinterTextParserImg;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.izettle.html2bitmap.Html2Bitmap;
 import com.izettle.html2bitmap.content.WebViewContent;
 
@@ -41,6 +34,10 @@ public class LocalDevices extends CordovaPlugin {
             String html = data.getString(0);
             Gson gson = new Gson();
             Device device = gson.fromJson(data.getJSONObject(1).toString(), Device.class);
+            Log.d(TAG, "execute: " + device.settings);
+            if (device.settings == null) {
+                device.setSettings(new DeviceSettings());
+            }
             printEscPosHtml(callbackContext, html, device);
             return true;
         }
@@ -94,23 +91,30 @@ public class LocalDevices extends CordovaPlugin {
         cordova.getThreadPool().execute(new Runnable() {
             @Override
             public void run() {
-                int width = device.getWidthInPixels();
-                Bitmap bitmap = new Html2Bitmap.Builder().setContext(cordova.getContext()).setContent(WebViewContent.html(html)).setBitmapWidth(width).build().getBitmap();
+                Bitmap bitmap = new Html2Bitmap.Builder().setContext(cordova.getContext()).setContent(WebViewContent.html(html)).setBitmapWidth(device.getWidthInPixels()).build().getBitmap();
                 try {
                     TcpConnection tcpConnection = new TcpConnection(device.ip, 9100);
-                    EscPosPrinter printer = new EscPosPrinter(tcpConnection, 203, device.getWidthInPixels(), 32);
-                    if (device.settings.cash_drawer) {
-                        printer.printFormattedTextAndOpenCashBox("[C]<img>" + PrinterTextParserImg.bitmapToHexadecimalString(printer, bitmap) + "</img>\n", printer.getPrinterWidthMM());
+                    tcpConnection.connect();
+                    if (tcpConnection.isConnected()) {
+                        EscPosPrinterCommands printer = new EscPosPrinterCommands(tcpConnection);
+                        printer.printImage(EscPosPrinterCommands.bitmapToBytes(bitmap))
+                                .feedPaper(255)
+                                .feedPaper(255)
+                                .feedPaper(50)
+                                .cutPaper();
+                        if (device.settings.cash_drawer) printer.openCashBox();
+                        if (device.settings.bell) {
+                            tcpConnection.write(new byte[]{0x1B, 0x42});
+                            tcpConnection.write(new byte[]{1});
+                            tcpConnection.write(new byte[]{5});
+                            tcpConnection.send();
+                        }
+                        tcpConnection.disconnect();
+                        callbackContext.success();
                     } else {
-                        printer.printFormattedText("[C]<img>" + PrinterTextParserImg.bitmapToHexadecimalString(printer, bitmap) + "</img>\n", printer.getPrinterWidthMM());
+                        callbackContext.error("PrintConnectError");
                     }
-                    if (device.settings.bell) {
-                        tcpConnection.write(Utils.hexStringToByteArray("1B420403"));
-                    }
-                    printer.disconnectPrinter();
-                    callbackContext.success();
-                } catch (EscPosConnectionException | EscPosParserException | EscPosEncodingException | EscPosBarcodeException e) {
-                    e.printStackTrace();
+                } catch (Exception e) {
                     callbackContext.error(e.getMessage());
                 }
             }

@@ -1,15 +1,12 @@
 package com.arystankaliakparov.cordova_plugin_local_devices;
 
-import androidx.annotation.Nullable;
-
 public class Device {
     public String id;
     public String ip;
     public String name;
     public String type;
 
-    @Nullable
-    public DeviceSettings settings = null;
+    public DeviceSettings settings = new DeviceSettings();
 
     Device(String ip, String name, String type) {
         this.id = type + "-" + ip;
@@ -19,7 +16,10 @@ public class Device {
     }
 
     public int getWidthInPixels() {
-        Integer paperWidth = settings.paper_width != null ? settings.paper_width : 80;
-        return Integer.parseInt(DeviceSettings.PAPER_WIDTH_TO_PIXELS.get(paperWidth));
+        return Math.round((settings.paper_width - 8) * ((float) settings.dpi) / DeviceSettings.INCH_TO_MM);
+    }
+
+    public void setSettings(DeviceSettings settings) {
+        this.settings = settings;
     }
 }

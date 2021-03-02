@@ -37,4 +37,20 @@
     <source-file src="src/android/Utils.java" target-dir="src/com/arystankaliakparov/cordova_plugin_local_devices/"/>
     <source-file src="src/android/DeviceSettings.java" target-dir="src/com/arystankaliakparov/cordova_plugin_local_devices/"/>
   </platform>
+
+  <platform name="ios">
+    <dependency id="cordova-plugin-add-swift-support" version="2.0.2"/>
+    <podspec>
+      <pods use-frameworks="true">
+        <pod name="MMLanScan" spec="~> 3.0.0" />
+      </pods>
+    </podspec>
+
+    <config-file target="config.xml" parent="/*">
+      <feature name="LocalDevices">
+        <param name="ios-package" value="LocalDevices"/>
+      </feature>
+    </config-file>
+    <source-file src="src/ios/LocalDevices.swift" />
+  </platform>
 </plugin>
